@@ -48,8 +48,10 @@ function regenerate() {
   randomSeed(seed);
   noiseSeed(seed);
   projectNumber = nf(seed % 9999, 4);
-  groundY = SHEET_H - 260;
-  topY = MARGIN + 140;
+  //groundY = SHEET_H - 260;
+  groundY = SHEET_H - 34;
+  //topY = MARGIN + 140;
+  topY = MARGIN;
   buildings = generateBuildings();
   topBuildings = generateBuildings();
   markers = generateMarkers();
@@ -156,8 +158,8 @@ function draw() {
     drawMarkers();
     //drawCallouts();
   }
-  drawCompass();
-  drawTitleBlock();
+  //drawCompass();
+  //drawTitleBlock();
   drawInstructions();
 }
 
@@ -253,24 +255,24 @@ function drawBuilding(b, anchorY, dir) {
   // floor lines + mullions
   stroke(ink(100));
   strokeWeight(0.8);
-  for (const r of tierRects) {
-    for (let fy = r.yBot; fy > r.yTop; fy -= b.floorHeight) {
-      const yy = max(fy, r.yTop);
-      line(r.x, yy, r.x + r.w, yy);
-    }
-    for (let fx = r.x; fx <= r.x + r.w; fx += b.mullionSpacing) {
-      line(fx, r.yTop, fx, r.yBot);
-    }
-  }
+  // for (const r of tierRects) {
+  //   for (let fy = r.yBot; fy > r.yTop; fy -= b.floorHeight) {
+  //     const yy = max(fy, r.yTop);
+  //     line(r.x, yy, r.x + r.w, yy);
+  //   }
+  //   for (let fx = r.x; fx <= r.x + r.w; fx += b.mullionSpacing) {
+  //     line(fx, r.yTop, fx, r.yBot);
+  //   }
+  // }
 
   // cross bracing on lowest tier
-  if (b.hasBrace && tierRects.length > 0) {
-    const r = tierRects[0];
-    stroke(ink(160));
-    strokeWeight(1.2);
-    line(r.x, r.yBot, r.x + r.w, r.yTop);
-    line(r.x + r.w, r.yBot, r.x, r.yTop);
-  }
+  // if (b.hasBrace && tierRects.length > 0) {
+  //   const r = tierRects[0];
+  //   stroke(ink(160));
+  //   strokeWeight(1.2);
+  //   line(r.x, r.yBot, r.x + r.w, r.yTop);
+  //   line(r.x + r.w, r.yBot, r.x, r.yTop);
+  // }
 
   // spire
   if (b.hasSpire) {

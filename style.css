@@ -14,5 +14,10 @@ html, body {
 }
 
 canvas {
+  width: auto !important;
+  height: auto !important;
+  max-width: 96vw;
+  max-height: 96vh;
+  aspect-ratio: 1000 / 1400;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
 }
