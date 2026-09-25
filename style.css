@@ -1,0 +1,18 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #05070a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#sketch-holder {
+  display: flex;
+}
+
+canvas {
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+}
