@@ -9,8 +9,10 @@ const MARGIN = 36;
 
 const INK = { r: 214, g: 233, b: 255 };
 const BG = [9, 32, 61];
+const SHOW_ANNOTATIONS = true;
 
 let buildings = [];
+let topBuildings = [];
 let markers = [];
 let callouts = [];
 let seed;
@@ -19,7 +21,7 @@ let groundY;
 let topY;
 
 function setup() {
-  const holder = document.getElementById('sketch-holder');
+  const holder = document.getElementById("sketch-holder");
   const c = createCanvas(SHEET_W, SHEET_H);
   c.parent(holder);
   noLoop();
@@ -34,9 +36,9 @@ function mousePressed() {
 }
 
 function keyPressed() {
-  if (key === 's' || key === 'S') {
-    saveCanvas('blueprint-' + projectNumber, 'png');
-  } else if (key === 'r' || key === 'R') {
+  if (key === "s" || key === "S") {
+    saveCanvas("blueprint-" + projectNumber, "png");
+  } else if (key === "r" || key === "R") {
     regenerate();
   }
 }
@@ -49,6 +51,7 @@ function regenerate() {
   groundY = SHEET_H - 260;
   topY = MARGIN + 140;
   buildings = generateBuildings();
+  topBuildings = generateBuildings();
   markers = generateMarkers();
   callouts = generateCallouts();
   redraw();
@@ -105,7 +108,7 @@ function generateMarkers() {
   for (let i = 0; i < count; i++) {
     arr.push({
       x: random(MARGIN + 30, SHEET_W - MARGIN - 30),
-      label: 'BM-' + nf(i + 1, 2),
+      label: "BM-" + nf(i + 1, 2),
     });
   }
   return arr;
@@ -113,13 +116,13 @@ function generateMarkers() {
 
 function generateCallouts() {
   const labels = [
-    'CURTAIN WALL',
-    'STRUCTURAL BAY',
-    'SETBACK LINE',
-    'MECH. PENTHOUSE',
-    'PODIUM LEVEL',
-    'FACADE MODULE',
-    'ROOF ACCESS',
+    "CURTAIN WALL",
+    "STRUCTURAL BAY",
+    "SETBACK LINE",
+    "MECH. PENTHOUSE",
+    "PODIUM LEVEL",
+    "FACADE MODULE",
+    "ROOF ACCESS",
   ];
   const arr = [];
   const count = min(3, buildings.length);
@@ -147,10 +150,12 @@ function draw() {
   drawGround();
   drawCeiling();
   for (const b of buildings) drawBuilding(b, groundY, -1);
-  for (const b of buildings) drawBuilding(b, topY, 1);
-  drawDimensions();
-  drawMarkers();
-  drawCallouts();
+  for (const b of topBuildings) drawBuilding(b, topY, 1);
+  if (SHOW_ANNOTATIONS) {
+    drawDimensions();
+    drawMarkers();
+    //drawCallouts();
+  }
   drawCompass();
   drawTitleBlock();
   drawInstructions();
@@ -230,7 +235,13 @@ function drawBuilding(b, anchorY, dir) {
     const tx = (b.baseWidth - tw) / 2;
     const yA = dir * cy;
     const yB = dir * (cy + th);
-    tierRects.push({ x: tx, yTop: min(yA, yB), yBot: max(yA, yB), w: tw, h: th });
+    tierRects.push({
+      x: tx,
+      yTop: min(yA, yB),
+      yBot: max(yA, yB),
+      w: tw,
+      h: th,
+    });
     cy += th;
   }
 
@@ -280,7 +291,7 @@ function drawBuilding(b, anchorY, dir) {
 }
 
 function drawDimensions() {
-  textFont('Courier New');
+  textFont("Courier New");
   textSize(10);
   noFill();
 
@@ -300,7 +311,7 @@ function drawDimensions() {
     noStroke();
     fill(ink(200));
     textAlign(CENTER, CENTER);
-    text(round(b.totalHeight) + ' u', 0, 0);
+    text(round(b.totalHeight) + " u", 0, 0);
     pop();
 
     stroke(ink(120));
@@ -312,7 +323,7 @@ function drawDimensions() {
     noStroke();
     fill(ink(200));
     textAlign(CENTER, TOP);
-    text(round(b.baseWidth) + ' u', b.x + b.baseWidth / 2, dimY + 4);
+    text(round(b.baseWidth) + " u", b.x + b.baseWidth / 2, dimY + 4);
   }
 }
 
@@ -327,7 +338,7 @@ function drawMarkers() {
 
     noStroke();
     fill(ink(160));
-    textFont('Courier New');
+    textFont("Courier New");
     textSize(9);
     textAlign(CENTER, TOP);
     text(m.label, m.x, groundY + 10);
@@ -335,7 +346,7 @@ function drawMarkers() {
 }
 
 function drawCallouts() {
-  textFont('Courier New');
+  textFont("Courier New");
   textSize(10);
   for (const c of callouts) {
     const lx = c.x + c.dir * 60;
@@ -350,7 +361,11 @@ function drawCallouts() {
 
     fill(ink(210));
     textAlign(c.dir > 0 ? LEFT : RIGHT, BOTTOM);
-    text(c.label, lx + c.dir * 22 * (c.dir > 0 ? 1 : -1) - (c.dir > 0 ? 0 : 0), c.y - 22);
+    text(
+      c.label,
+      lx + c.dir * 22 * (c.dir > 0 ? 1 : -1) - (c.dir > 0 ? 0 : 0),
+      c.y - 22,
+    );
   }
 }
 
@@ -373,10 +388,10 @@ function drawCompass() {
   fill(ink(230));
   triangle(cx, cy - r + 4, cx - 5, cy - r + 16, cx + 5, cy - r + 16);
 
-  textFont('Courier New');
+  textFont("Courier New");
   textSize(11);
   textAlign(CENTER, BOTTOM);
-  text('N', cx, cy - r - 4);
+  text("N", cx, cy - r - 4);
 }
 
 function drawTitleBlock() {
@@ -400,46 +415,50 @@ function drawTitleBlock() {
 
   noStroke();
   fill(ink(230));
-  textFont('Courier New');
+  textFont("Courier New");
   textAlign(LEFT, CENTER);
 
   textSize(13);
-  text('GENERATIVE ARCHITECTURE', bx + 10, by + rowH * 0.5);
+  text("GENERATIVE ARCHITECTURE", bx + 10, by + rowH * 0.5);
 
   textSize(10);
   fill(ink(180));
-  text('STUDY NO.', bx + 10, by + rowH * 1.5);
+  text("STUDY NO.", bx + 10, by + rowH * 1.5);
   fill(ink(230));
   textAlign(RIGHT, CENTER);
   text(projectNumber, bx + bw - 10, by + rowH * 1.5);
 
   textAlign(LEFT, CENTER);
   fill(ink(180));
-  text('SCALE', bx + 10, by + rowH * 2.5);
+  text("SCALE", bx + 10, by + rowH * 2.5);
   fill(ink(230));
   textAlign(RIGHT, CENTER);
-  text('1 : 100', bx + bw - 10, by + rowH * 2.5);
+  text("1 : 100", bx + bw - 10, by + rowH * 2.5);
 
   textAlign(LEFT, CENTER);
   fill(ink(180));
-  text('SEED', bx + 10, by + rowH * 3.5);
+  text("SEED", bx + 10, by + rowH * 3.5);
   fill(ink(230));
   textAlign(RIGHT, CENTER);
   text(String(seed), bx + bw - 10, by + rowH * 3.5);
 
   textAlign(LEFT, CENTER);
   fill(ink(180));
-  text('REV', bx + 10, by + rowH * 4.5);
+  text("REV", bx + 10, by + rowH * 4.5);
   fill(ink(230));
   textAlign(RIGHT, CENTER);
-  text('A', bx + bw - 10, by + rowH * 4.5);
+  text("A", bx + bw - 10, by + rowH * 4.5);
 }
 
 function drawInstructions() {
   noStroke();
   fill(ink(90));
-  textFont('Courier New');
+  textFont("Courier New");
   textSize(10);
   textAlign(LEFT, BOTTOM);
-  text('CLICK: REGENERATE   [S] SAVE PNG   [R] REGENERATE', MARGIN + 4, SHEET_H - MARGIN - 8);
+  text(
+    "CLICK: REGENERATE   [S] SAVE PNG   [R] REGENERATE",
+    MARGIN + 4,
+    SHEET_H - MARGIN - 8,
+  );
 }
