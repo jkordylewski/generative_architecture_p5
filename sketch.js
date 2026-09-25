@@ -16,6 +16,7 @@ let callouts = [];
 let seed;
 let projectNumber;
 let groundY;
+let topY;
 
 function setup() {
   const holder = document.getElementById('sketch-holder');
@@ -46,6 +47,7 @@ function regenerate() {
   noiseSeed(seed);
   projectNumber = nf(seed % 9999, 4);
   groundY = SHEET_H - 260;
+  topY = MARGIN + 140;
   buildings = generateBuildings();
   markers = generateMarkers();
   callouts = generateCallouts();
@@ -143,7 +145,9 @@ function draw() {
   drawGrid();
   drawBorder();
   drawGround();
-  for (const b of buildings) drawBuilding(b);
+  drawCeiling();
+  for (const b of buildings) drawBuilding(b, groundY, -1);
+  for (const b of buildings) drawBuilding(b, topY, 1);
   drawDimensions();
   drawMarkers();
   drawCallouts();
@@ -197,9 +201,22 @@ function drawGround() {
   }
 }
 
-function drawBuilding(b) {
+function drawCeiling() {
+  stroke(ink(220));
+  strokeWeight(2.5);
+  line(MARGIN, topY, SHEET_W - MARGIN, topY);
+
+  stroke(ink(60));
+  strokeWeight(1);
+  const hatchTop = max(topY - 26, MARGIN);
+  for (let x = MARGIN; x < SHEET_W - MARGIN; x += 12) {
+    line(x, topY - 3, x - 10, hatchTop);
+  }
+}
+
+function drawBuilding(b, anchorY, dir) {
   push();
-  translate(b.x, groundY);
+  translate(b.x, anchorY);
 
   let cy = 0;
   stroke(ink(230));
@@ -211,7 +228,9 @@ function drawBuilding(b) {
     const th = b.tierHeights[t];
     const tw = b.tierWidths[t];
     const tx = (b.baseWidth - tw) / 2;
-    tierRects.push({ x: tx, yTop: -(cy + th), yBot: -cy, w: tw, h: th });
+    const yA = dir * cy;
+    const yB = dir * (cy + th);
+    tierRects.push({ x: tx, yTop: min(yA, yB), yBot: max(yA, yB), w: tw, h: th });
     cy += th;
   }
 
@@ -249,10 +268,11 @@ function drawBuilding(b) {
     stroke(ink(220));
     strokeWeight(1.4);
     const spireH = random(30, 70);
-    line(cx, top.yTop, cx, top.yTop - spireH);
+    const spireEnd = dir < 0 ? top.yTop - spireH : top.yBot + spireH;
+    line(cx, dir < 0 ? top.yTop : top.yBot, cx, spireEnd);
     noStroke();
     fill(ink(220));
-    ellipse(cx, top.yTop - spireH, 4, 4);
+    ellipse(cx, spireEnd, 4, 4);
     noFill();
   }
 
