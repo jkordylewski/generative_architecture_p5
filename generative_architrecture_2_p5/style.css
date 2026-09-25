@@ -1,0 +1,32 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #ece7dc;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+#sketch-holder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+#sketch-holder canvas {
+  display: block;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.14);
+}
+
+#hint {
+  position: fixed;
+  left: 16px;
+  bottom: 12px;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: rgba(40, 36, 30, 0.55);
+  user-select: none;
+  pointer-events: none;
+}
