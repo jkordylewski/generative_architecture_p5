@@ -70,8 +70,8 @@ function keyPressed() {
 // ---------- composition ----------
 
 function generateComposition(w, h) {
-  const marginTop = h * 0.18;
-  const groundY = h - h * 0.12;
+  const marginTop = h * 0.3;
+  const groundY = h - h * 0.14;
   const spanH = groundY - marginTop;
 
   const buildings = [];
@@ -79,16 +79,16 @@ function generateComposition(w, h) {
 
   while (x < w) {
     const remaining = w - x;
-    let bw = random(110, 230);
-    if (remaining - bw < 70 && remaining - bw > 0) bw = remaining;
+    let bw = random(90, 190);
+    if (remaining - bw < 60 && remaining - bw > 0) bw = remaining;
     bw = min(bw, remaining);
 
     const palette = random(PALETTES);
-    const floorH = random(38, 58);
-    const maxFloors = floor((spanH * random(0.35, 0.78)) / floorH);
+    const floorH = random(28, 44);
+    const maxFloors = floor((spanH * random(0.35, 0.72)) / floorH);
     const floors = max(3, maxFloors);
     const buildingH = floors * floorH;
-    const bayW = random(40, 62);
+    const bayW = random(30, 48);
     const bays = max(1, round(bw / bayW));
 
     buildings.push({
