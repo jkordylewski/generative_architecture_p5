@@ -17,10 +17,13 @@ const ROOF_TYPES = ["flat", "flat", "parapet", "setback", "pitched"];
 
 let composition;
 let seedValue;
+let canvasEl;
 
 function setup() {
   const size = canvasSize();
-  createCanvas(size.w, size.h).parent("sketch-holder");
+  const cnv = createCanvas(size.w, size.h);
+  cnv.parent("sketch-holder");
+  canvasEl = cnv.canvas;
   pixelDensity(2);
   noStroke();
   regenerate();
@@ -63,7 +66,85 @@ function keyPressed() {
   if (key === " ") {
     regenerate();
   } else if (key === "s" || key === "S") {
-    saveCanvas(`facades_${seedValue}`, "png");
+    savePNG(`facades_${seedValue}`);
+  }
+}
+
+// ---------- save PNGs directly into this sketch's folder ----------
+// Chrome/Edge only (File System Access API). The first save asks you
+// to pick this sketch's folder; the choice is then remembered (per
+// browser profile) so later saves write there with no prompt. Falls
+// back to a normal browser download elsewhere.
+
+let saveDirHandle = null;
+
+function openSaveDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open("sketch-save-folder-facades", 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("handles");
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGetHandle() {
+  const db = await openSaveDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction("handles", "readonly").objectStore("handles").get("dir");
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbSetHandle(handle) {
+  const db = await openSaveDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("handles", "readwrite");
+    tx.objectStore("handles").put(handle, "dir");
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function ensureSaveFolder() {
+  if (!window.showDirectoryPicker) return null;
+
+  if (!saveDirHandle) {
+    saveDirHandle = await idbGetHandle().catch(() => null);
+  }
+
+  if (saveDirHandle) {
+    const perm = await saveDirHandle.queryPermission({ mode: "readwrite" });
+    if (perm === "granted") return saveDirHandle;
+    if (
+      perm === "prompt" &&
+      (await saveDirHandle.requestPermission({ mode: "readwrite" })) === "granted"
+    ) {
+      return saveDirHandle;
+    }
+  }
+
+  saveDirHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+  await idbSetHandle(saveDirHandle);
+  return saveDirHandle;
+}
+
+async function savePNG(filename) {
+  const folder = await ensureSaveFolder().catch(() => null);
+  if (!folder) {
+    saveCanvas(filename, "png");
+    return;
+  }
+  try {
+    const blob = await new Promise((resolve) => canvasEl.toBlob(resolve, "image/png"));
+    const fileHandle = await folder.getFileHandle(filename + ".png", { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+    console.log("Saved " + filename + ".png to sketch folder");
+  } catch (e) {
+    console.warn("Folder save failed, falling back to download:", e);
+    saveCanvas(filename, "png");
   }
 }
 
