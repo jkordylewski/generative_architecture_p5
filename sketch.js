@@ -8,7 +8,7 @@ const SHEET_H = 1400;
 const MARGIN = 36;
 
 const INK = { r: 214, g: 233, b: 255 };
-const BG = [9, 32, 61];
+const BG = [5, 20, 40];
 const SHOW_ANNOTATIONS = true;
 
 let buildings = [];
@@ -228,7 +228,7 @@ function drawBuilding(b, anchorY, dir) {
   let cy = 0;
   stroke(ink(230));
   strokeWeight(1.6);
-  noFill();
+  fill(0, 75);
 
   const tierRects = [];
   for (let t = 0; t < b.tierHeights.length; t++) {
